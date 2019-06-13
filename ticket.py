@@ -144,6 +144,11 @@ if __name__ == "__main__":
     # printer = Printer()
     json = JsonManager("contador")
     ticket = json.get("ticket") + 1
+    lastdate = datetime.strptime(json.get("data"), "%Y-%m-%d %H:%M:%S.%f")
+    if lastdate.date() < datetime.now().date():
+        print("Bom dia!")
+        ticket = 1
+
     print("Pressione enter para gerar próximas senhas (próxima: %d)" % ticket)
 
     while True:
