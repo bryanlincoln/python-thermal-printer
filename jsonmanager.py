@@ -8,7 +8,7 @@ class JsonManager:
             filer = open(filename + ".json", "r")
         except EnvironmentError:
             print("Erro ao abrir contador para leitura.")
-            return False
+            return
 
         self.data = {}
         try:
@@ -17,17 +17,10 @@ class JsonManager:
                 filer.close()
         except json.JSONDecodeError as e:
             print("JSON parse error: " + e.msg)
-            return False
+            return
 
-        self.file = None
-
-        try:
-            self.file = open(filename + ".json", "w")
-        except EnvironmentError:
-            print("Erro ao abrir contador para escrita.")
-            return False
+        self.filename = filename
         
-
     def get(self, key):
         if key in self.data:
             return self.data[key]
@@ -39,8 +32,14 @@ class JsonManager:
         self.data[key] = value
 
         try:
-            json.dump(self.data, self.file)
-            self.file.flush()
+            file = open(self.filename + ".json", "w")
+        except EnvironmentError:
+            print("Erro ao abrir contador para escrita.")
+            return False
+
+        try:
+            json.dump(self.data, file)
+            file.close()
             return True
         except TypeError:
             print("Error saving to file.")

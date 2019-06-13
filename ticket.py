@@ -1,5 +1,8 @@
 from datetime import datetime
 from jsonmanager import JsonManager
+import time
+from termios import tcflush, TCIFLUSH
+import sys
 
 
 class Printer:
@@ -138,17 +141,20 @@ def printCompany(printer, ticket):
 
 
 if __name__ == "__main__":
-    printer = Printer()
+    # printer = Printer()
     json = JsonManager("contador")
-    ticket = 123
-    print("Pressione enter para gerar próximas senhas")
+    ticket = json.get("ticket") + 1
+    print("Pressione enter para gerar próximas senhas (próxima: %d)" % ticket)
 
     while True:
-        text = input()
+        input()  # faz esperar um enter
+        now = datetime.now()
         # printClient(printer, ticket)
         # printCompany(printer, ticket)
-        print("Gerou senha " + str(ticket))
+        print("Gerou senha " + str(ticket) + " em " + now.strftime("%d/%m/%Y às %H:%M:%S"))
         # salva ticket gerado e hora
         json.set("ticket", ticket)
-        json.set("data", str(datetime.now()))
+        json.set("data", str(now))
         ticket += 1
+        time.sleep(1)
+        tcflush(sys.stdin, TCIFLUSH)
