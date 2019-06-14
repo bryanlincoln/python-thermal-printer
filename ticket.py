@@ -3,6 +3,7 @@ from jsonmanager import JsonManager
 import time
 from termios import tcflush, TCIFLUSH
 import sys
+import os
 
 
 class Printer:
@@ -10,11 +11,10 @@ class Printer:
     GS="\x1d"
     NUL="\x00"
 
-    def __init__(self):
-        try:
-            self.usbprinter = open("/dev/usb/lp0", 'w')
-        except:
-            print("Impressora não alcançável.")
+    def __init__(self, printerpath):
+        self.usbprinter = None
+        self.printerpath = printerpath
+        self.connect()
         
         # configura a impressora
         self.output = ""
@@ -24,13 +24,29 @@ class Printer:
 
     ### CONTROL METHODS ###
 
+    def connect(self):
+        print("Esperando conexão com impressora no caminho \033[1m\"" + self.printerpath + "\"\033[0m")
+        while True:
+            try:
+                self.usbprinter = open(self.printerpath, 'w')
+                print("Impressora conectada.")
+                return True
+            except:
+                print("A conexão falhou. Certifique-se que o programa está rodando como administrador.")
+
+            time.sleep(2)
+
     def print(self):
-        try:
-            self.usbprinter.write(self.output)
-            self.usbprinter.flush()
-            self.reset()
-        except:
-            print("Não é possível escrever na impressora!")
+        while True:
+            try:
+                self.usbprinter.write(self.output)
+                self.usbprinter.flush()
+                self.reset()
+                return
+            except:
+                print("Impressora desconectada!")
+                self.connect()
+                time.sleep(2)
 
     def reset(self):
         self.output = Printer.ESC + "@" # Reset to defaults
@@ -38,7 +54,7 @@ class Printer:
     ### WRITING METHODS ###
 
     def onBold(self):
-        self.output += Printer.ESC + "E" + chr(1); # Bold
+        self.output += Printer.ESC + "E" + chr(2); # Bold
     
     def offBold(self):
         self.output += Printer.ESC + "E" + chr(0); # Not Bold
@@ -82,6 +98,8 @@ class Printer:
 
 def printClient(printer, ticket):
     printer.alignCenter()
+    printer.setTextSize(2)
+    printer.addText("Acai Express\n")
     printer.setTextSize(1)
     printer.addText("SENHA")
     printer.onBold()
@@ -98,14 +116,21 @@ def printClient(printer, ticket):
     printer.print()
 
 def printCompany(printer, ticket):
+    printer.alignCenter()
+    printer.setTextSize(2)
+    printer.addText("Acai Express\n")
+
     printer.alignLeft()
     printer.setTextSize(1)
     printer.addText("Senha:", False)
+
     printer.onBold()
     printer.addText(ticket)
     printer.offBold()
+
     printer.setTextSize(0)
     printer.addText(datetime.now().strftime("%d/%m/%Y - %H:%M:%S"))
+
     printer.setTextSize(1)
     printer.onUnderline()
     printer.addText("                       ")
@@ -120,43 +145,101 @@ def printCompany(printer, ticket):
     printer.addText("9 - Creme c/           ")
     printer.addText("10 - Acai c/           ")
     printer.offUnderline()
+
     printer.addText("")
+    printer.addText("      S", False)
     printer.onUnderline()
+    printer.addText("e", False)
+    printer.offUnderline()
+    printer.addText("m  Mu", False)
+    printer.onUnderline()
+    printer.addText("i", False)
+    printer.offUnderline()
+    printer.addText("to  Po", False)
+    printer.onUnderline()
+    printer.addText("u", False)
+    printer.offUnderline()
+    printer.addText("co")
+
     printer.onBold()
     printer.addText("Gelo", False)
     printer.offBold()
-    printer.addText("   Sem   P   M   G")
+
+    printer.addText("  [", False)
+    printer.onUnderline()
+    printer.addText(" ", False)
+    printer.offUnderline()
+    printer.addText("]   [", False)
+    printer.onUnderline()
+    printer.addText(" ", False)
+    printer.offUnderline()
+    printer.addText("]    [", False)
+    printer.onUnderline()
+    printer.addText(" ", False)
+    printer.offUnderline()
+    printer.addText("]")
+
     printer.onBold()
     printer.addText("Doce", False)
     printer.offBold()
-    printer.addText("   Sem   P   M   G")
+    
+    printer.addText("  [", False)
+    printer.onUnderline()
+    printer.addText(" ]", False)
     printer.offUnderline()
+    printer.addText("   [", False)
+    printer.onUnderline()
+    printer.addText(" ", False)
+    printer.offUnderline()
+    printer.addText("]   ", False)
+    printer.onUnderline()
+    printer.addText(" [ ", False)
+    printer.offUnderline()
+    printer.addText("]")
+
     printer.onBold()
     printer.addText("Levar", False)
     printer.offBold()
-    printer.addText("  Sim    Nao")
-    printer.addLine(4)
+
+    printer.addText("  [", False)
+    printer.onUnderline()
+    printer.addText(" ", False)
+    printer.offUnderline()
+    printer.addText("] Sim   [", False)
+    printer.onUnderline()
+    printer.addText(" ", False)
+    printer.offUnderline()
+    printer.addText("] Nao")
+
+    printer.addLine(3)
     printer.cut()
     printer.print()
 
 
 if __name__ == "__main__":
-    # printer = Printer()
     json = JsonManager("contador")
     ticket = json.get("ticket") + 1
-    lastdate = datetime.strptime(json.get("data"), "%Y-%m-%d %H:%M:%S.%f")
-    if lastdate.date() < datetime.now().date():
-        print("Bom dia!")
-        ticket = 1
+    printerpath = json.get("printer")
+    print("O programa se conectará com a impressora no caminho \"" + printerpath + "\".")
+    printerpath_ = input("Digite um caminho diferente ou pressione Enter para continuar: ")
+    printerpath = printerpath if printerpath_ == "" else printerpath_
+    printer = Printer(printerpath)
 
     print("Pressione enter para gerar próximas senhas (próxima: %d)" % ticket)
 
     while True:
         input()  # faz esperar um enter
+
+        # reseta contagem de tickets caso o programa não seja reiniciado
+        lastdate = datetime.strptime(json.get("data"), "%Y-%m-%d %H:%M:%S.%f")
+        if lastdate.date() < datetime.now().date():
+            ticket = 1
+            
         now = datetime.now()
-        # printClient(printer, ticket)
-        # printCompany(printer, ticket)
+        printClient(printer, ticket)
+        printCompany(printer, ticket)
         print("Gerou senha " + str(ticket) + " em " + now.strftime("%d/%m/%Y às %H:%M:%S"))
+
         # salva ticket gerado e hora
         json.set("ticket", ticket)
         json.set("data", str(now))
