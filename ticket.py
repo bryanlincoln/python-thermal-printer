@@ -222,7 +222,10 @@ if __name__ == "__main__":
     printerpath = json.get("printer")
     print("O programa se conectará com a impressora no caminho \"" + printerpath + "\".")
     printerpath_ = input("Digite um caminho diferente ou pressione Enter para continuar: ")
-    printerpath = printerpath if printerpath_ == "" else printerpath_
+    if printerpath_ != "":
+        printerpath = printerpath_
+        json.set("printer", printerpath)
+        
     printer = Printer(printerpath)
 
     print("Pressione enter para gerar próximas senhas (próxima: %d)" % ticket)
