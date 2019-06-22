@@ -5,7 +5,7 @@ import time
 from termios import tcflush, TCIFLUSH
 import sys
 import os
-import pyxhook
+import keyboard
 
 
 class Printer:
@@ -220,7 +220,7 @@ def printCompany(printer, ticket):
 
 
 def kbevent(event):
-    if event.Ascii == 0:
+    if event.name == "enter":
         printevent()
 
 
@@ -255,13 +255,7 @@ if __name__ == "__main__":
 
     print("Pressione enter para gerar proximas senhas (proxima: %d)" % ticket)
 
-    # Create hookmanager
-    hookman = pyxhook.HookManager()
-    hookman.KeyDown = kbevent
-    hookman.HookKeyboard()
-    hookman.start()
+    keyboard.on_press(kbevent)
 
     while True:
-        time.sleep(0.1)
-
-    hookman.cancel()
+        time.sleep(1)
