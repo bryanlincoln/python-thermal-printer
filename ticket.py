@@ -1,9 +1,11 @@
+#!/usr/bin/python3
 from datetime import datetime
 from jsonmanager import JsonManager
 import time
 from termios import tcflush, TCIFLUSH
 import sys
 import os
+import pyxhook
 
 
 class Printer:
@@ -103,13 +105,14 @@ def printClient(printer, ticket):
     printer.setTextSize(1)
     printer.addText("SENHA")
     printer.onBold()
-    printer.onUnderline()
     printer.setTextSize(6)
     printer.addText(ticket)
-    printer.offUnderline()
-    printer.offBold()
     printer.addLine(2)
     printer.setTextSize(0)
+    printer.onUnderline()
+    printer.addText("R$:            ")
+    printer.offUnderline()
+    printer.offBold()
     printer.addText(datetime.now().strftime("%d/%m/%Y - %H:%M:%S"))
     printer.addLine(4)
     printer.cut()
@@ -134,16 +137,16 @@ def printCompany(printer, ticket):
     printer.setTextSize(1)
     printer.onUnderline()
     printer.addText("                       ")
-    printer.addText("1 - 1 Polpa de Acai    ")
-    printer.addText("2 - 2 Polpas de Acai   ")
-    printer.addText("3 - Acai c/ banana     ")
-    printer.addText("4 - Acai c/ maracuja   ")
-    printer.addText("5 - Acai c/ chocolate  ")
-    printer.addText("6 - Acai c/ morango    ")
-    printer.addText("7 - Acai c/ cupuacu    ")
-    printer.addText("8 - Bomba c/           ")
-    printer.addText("9 - Creme c/           ")
-    printer.addText("10 - Acai c/           ")
+    printer.addText("   1-1 Polpa de Acai   ")
+    printer.addText("   2-2 Polpas de Acai  ")
+    printer.addText("   3-Acai c/ banana    ")
+    printer.addText("   4-Acai c/ maracuja  ")
+    printer.addText("   5-Acai c/ chocolate ")
+    printer.addText("   6-Acai c/ morango   ")
+    printer.addText("   7-Acai c/ cupuacu   ")
+    printer.addText("   8-Bomba c/          ")
+    printer.addText("   9-Creme c/          ")
+    printer.addText("   10-Acai c/          ")
     printer.offUnderline()
 
     printer.addText("")
@@ -216,36 +219,49 @@ def printCompany(printer, ticket):
     printer.print()
 
 
+def kbevent(event):
+    if event.Ascii == 0:
+        printevent()
+
+
+def printevent():
+    global json, ticket, printer
+
+    # reseta contagem de tickets caso o programa não seja reiniciado
+    lastdate = datetime.strptime(json.get("data"), "%Y-%m-%d %H:%M:%S.%f")
+    if lastdate.date() < datetime.now().date():
+        ticket = 1
+        
+    now = datetime.now()
+    printClient(printer, ticket)
+    printCompany(printer, ticket)
+    print("Gerou senha " + str(ticket) + " em " + now.strftime("%d/%m/%Y às %H:%M:%S"))
+
+    # salva ticket gerado e hora
+    json.set("ticket", ticket)
+    json.set("data", str(now))
+    ticket += 1
+    time.sleep(1)
+    tcflush(sys.stdin, TCIFLUSH)
+
+
 if __name__ == "__main__":
     json = JsonManager("contador")
     ticket = json.get("ticket") + 1
     printerpath = json.get("printer")
     print("O programa se conectará com a impressora no caminho \"" + printerpath + "\".")
-    printerpath_ = input("Digite um caminho diferente ou pressione Enter para continuar: ")
-    if printerpath_ != "":
-        printerpath = printerpath_
-        json.set("printer", printerpath)
         
     printer = Printer(printerpath)
 
     print("Pressione enter para gerar próximas senhas (próxima: %d)" % ticket)
 
+    # Create hookmanager
+    hookman = pyxhook.HookManager()
+    hookman.KeyDown = kbevent
+    hookman.HookKeyboard()
+    hookman.start()
+
     while True:
-        input()  # faz esperar um enter
+        time.sleep(0.1)
 
-        # reseta contagem de tickets caso o programa não seja reiniciado
-        lastdate = datetime.strptime(json.get("data"), "%Y-%m-%d %H:%M:%S.%f")
-        if lastdate.date() < datetime.now().date():
-            ticket = 1
-            
-        now = datetime.now()
-        printClient(printer, ticket)
-        printCompany(printer, ticket)
-        print("Gerou senha " + str(ticket) + " em " + now.strftime("%d/%m/%Y às %H:%M:%S"))
-
-        # salva ticket gerado e hora
-        json.set("ticket", ticket)
-        json.set("data", str(now))
-        ticket += 1
-        time.sleep(1)
-        tcflush(sys.stdin, TCIFLUSH)
+    hookman.cancel()
