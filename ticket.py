@@ -238,10 +238,10 @@ def kbevent(event):
 
 
 def printevent():
-    global json, ticket, printer
+    global _json, ticket, printer
 
     # reseta contagem de tickets caso o programa não seja reiniciado
-    lastdate = datetime.strptime(json.get("data"), "%Y-%m-%d %H:%M:%S.%f")
+    lastdate = datetime.strptime(_json.get("data"), "%Y-%m-%d %H:%M:%S.%f")
     if lastdate.date() < datetime.now().date():
         ticket = 1
         
@@ -251,17 +251,17 @@ def printevent():
     print("Gerou senha " + str(ticket) + " em " + now.strftime("%d/%m/%Y as %H:%M:%S"))
 
     # salva ticket gerado e hora
-    json.set("ticket", ticket)
-    json.set("data", str(now))
+    _json.set("ticket", ticket)
+    _json.set("data", str(now))
     ticket += 1
     time.sleep(1)
     tcflush(sys.stdin, TCIFLUSH)
 
 
 if __name__ == "__main__":
-    json = JsonManager("contador")
-    ticket = json.get("ticket") + 1
-    printerpath = json.get("printer")
+    _json = JsonManager("contador")
+    ticket = _json.get("ticket") + 1
+    printerpath = _json.get("printer")
     print("O programa se conectara com a impressora no caminho \"" + printerpath + "\".")
         
     printer = Printer(printerpath)
