@@ -259,6 +259,7 @@ def printevent():
 
 
 if __name__ == "__main__":
+    time.sleep(5)  # espera o sistema terminar de acordar
     _json = JsonManager("contador")
     ticket = _json.get("ticket") + 1
     printerpath = _json.get("printer")
