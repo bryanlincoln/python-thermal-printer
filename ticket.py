@@ -98,6 +98,16 @@ class Printer:
         self.output += Printer.GS + "V\x41" + chr(3); # Cut
 
 
+def hello_world(printer):
+    printer.alignCenter()
+    printer.setTextSize(1)
+    printer.addText("Impressora pronta!")
+    printer.setTextSize(0)
+    printer.addText(datetime.now().strftime("%d/%m/%Y - %H:%M:%S"))
+    printer.addLine(2)
+    printer.cut()
+    printer.print()
+
 def printClient(printer, ticket):
     printer.alignCenter()
     printer.setTextSize(2)
@@ -257,6 +267,8 @@ if __name__ == "__main__":
     printer = Printer(printerpath)
 
     print("Pressione enter para gerar proximas senhas (proxima: %d)" % ticket)
+
+    hello_world(printer)
 
     keyboard.on_press(kbevent)
 
