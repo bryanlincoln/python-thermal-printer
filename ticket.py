@@ -104,7 +104,7 @@ def hello_world(printer):
     printer.addText("Impressora pronta!")
     printer.setTextSize(0)
     printer.addText(datetime.now().strftime("%d/%m/%Y - %H:%M:%S"))
-    printer.addLine(2)
+    printer.addLine(4)
     printer.cut()
     printer.print()
 
