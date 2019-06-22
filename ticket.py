@@ -27,14 +27,14 @@ class Printer:
     ### CONTROL METHODS ###
 
     def connect(self):
-        print("Esperando conexão com impressora no caminho \033[1m\"" + self.printerpath + "\"\033[0m")
+        print("Esperando conexao com impressora no caminho \033[1m\"" + self.printerpath + "\"\033[0m")
         while True:
             try:
                 self.usbprinter = open(self.printerpath, 'w')
                 print("Impressora conectada.")
                 return True
             except:
-                print("A conexão falhou. Certifique-se que o programa está rodando como administrador.")
+                print("A conexao falhou. Certifique-se que o programa esta rodando como administrador.")
 
             time.sleep(2)
 
@@ -249,11 +249,11 @@ if __name__ == "__main__":
     json = JsonManager("contador")
     ticket = json.get("ticket") + 1
     printerpath = json.get("printer")
-    print("O programa se conectará com a impressora no caminho \"" + printerpath + "\".")
+    print("O programa se conectara com a impressora no caminho \"" + printerpath + "\".")
         
     printer = Printer(printerpath)
 
-    print("Pressione enter para gerar próximas senhas (próxima: %d)" % ticket)
+    print("Pressione enter para gerar proximas senhas (proxima: %d)" % ticket)
 
     # Create hookmanager
     hookman = pyxhook.HookManager()
