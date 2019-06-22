@@ -1,6 +1,6 @@
 import json
 import os.path
-
+import sys
 
 class JsonManager:
     def __init__(self, filename):
@@ -8,6 +8,7 @@ class JsonManager:
             filer = open(filename + ".json", "r")
         except EnvironmentError:
             print("Erro ao abrir contador para leitura.")
+            print(sys.exc_info()[0])
             return
 
         self.data = {}
@@ -35,6 +36,7 @@ class JsonManager:
             file = open(self.filename + ".json", "w")
         except EnvironmentError:
             print("Erro ao abrir contador para escrita.")
+            print(sys.exc_info()[0])
             return False
 
         try:
