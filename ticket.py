@@ -235,7 +235,7 @@ def printevent():
     now = datetime.now()
     printClient(printer, ticket)
     printCompany(printer, ticket)
-    print("Gerou senha " + str(ticket) + " em " + now.strftime("%d/%m/%Y às %H:%M:%S"))
+    print("Gerou senha " + str(ticket) + " em " + now.strftime("%d/%m/%Y as %H:%M:%S"))
 
     # salva ticket gerado e hora
     json.set("ticket", ticket)
