@@ -232,7 +232,7 @@ def printCompany(printer, ticket):
 
 
 def kbevent(event):
-    print(event.name)
+    # print(event.name)
     if event.name == "enter":
         printevent()
 
