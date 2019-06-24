@@ -238,7 +238,12 @@ def kbevent(event):
 
 
 def printevent():
-    global _json, ticket, printer
+    global _json, ticket, printer, lastenter
+
+    if time.time() - lastenter < 1.5:
+        return
+
+    lastenter = time.time()
 
     # reseta contagem de tickets caso o programa não seja reiniciado
     lastdate = datetime.strptime(_json.get("data"), "%Y-%m-%d %H:%M:%S.%f")
@@ -254,7 +259,7 @@ def printevent():
     _json.set("ticket", ticket)
     _json.set("data", str(now))
     ticket += 1
-    time.sleep(1)
+    
     tcflush(sys.stdin, TCIFLUSH)
 
 
@@ -271,7 +276,8 @@ if __name__ == "__main__":
 
     hello_world(printer)
 
+    lastenter = time.time()
     keyboard.on_press(kbevent)
 
     while True:
-        time.sleep(1)
+        time.sleep(0.01)
