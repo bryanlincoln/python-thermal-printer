@@ -131,10 +131,6 @@ def printClient(printer, ticket):
     printer.print()
 
 def printCompany(printer, ticket):
-    printer.alignCenter()
-    printer.setTextSize(2)
-    printer.addText("Acai Express\n")
-
     printer.alignLeft()
     printer.setTextSize(1)
     printer.addText("Senha:", False)
